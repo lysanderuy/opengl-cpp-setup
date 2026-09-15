@@ -1,0 +1,64 @@
+# OpenGL Setup
+
+A verified base environment for OpenGL development in C++. GLFW and GLAD are
+already vendored and the VS Code / Cursor build task is wired up. All you
+need to do is confirm your local toolchain can compile and run it. If
+`src/main.cpp` builds and prints `Setup OK`, your environment is ready for
+OpenGL work.
+
+## Prerequisites
+
+- **MinGW-w64 via MSYS2**. Install from [msys2.org](https://www.msys2.org/),
+  then install the `mingw-w64-x86_64-gcc` toolchain (or equivalent) from
+  within the MSYS2 shell.
+
+## Vendored dependencies
+
+`include/glad`, `include/GLFW`, `include/KHR`, `lib/libglfw3dll.a`, and the
+root `glfw3.dll` are already included in this repo. You shouldn't need to
+reinstall anything, but here's where they came from in case a dependency
+ever needs to be regenerated or replaced:
+
+- **GLAD**, generated at [glad.dav1d.de](https://glad.dav1d.de/) with:
+  - Language: `C/C++`
+  - API: `gl` -> Version `3.3`
+  - Profile: `Core`
+  - All other APIs: `None`
+  - "Omit KHR": unchecked
+- **GLFW**, downloaded from the
+  [GLFW downloads page](https://www.glfw.org/download.html). Use the Windows
+  precompiled binaries, and pull the files from the `lib-mingw-w64` folder
+  specifically.
+
+## Setup
+
+1. Clone this repo.
+2. Open `.vscode/tasks.json` and edit the `"command"` field to point at your
+   own `g++.exe` (e.g. `C:/msys64/mingw64/bin/g++.exe`).
+3. Run the build task.
+4. Confirm the program prints `Setup OK`.
+
+## PATH requirement
+
+Besides pointing `tasks.json` at your `g++.exe`, you also need to add your
+compiler's `bin` folder (e.g. `C:\msys64\mingw64\bin`) to your system `PATH`
+environment variable.
+
+This is separate from the `tasks.json` compiler path. The `tasks.json`
+`"command"` only tells VS Code/Cursor which executable to launch directly.
+It doesn't help the processes that compiler spawns internally (such as
+`cc1plus.exe`) find their own DLL dependencies. Those child processes
+resolve their DLLs through the system PATH, so without this step the build
+can fail even though `tasks.json` looks correctly configured.
+
+## Troubleshooting
+
+- **Build fails silently, with no error text at all.** This is almost
+  always the missing PATH entry above. Add the compiler's `bin` folder to
+  your system PATH and try again.
+- **Program compiles but won't run, or fails to launch immediately.**
+  `libglfw3dll.a` is an import library: it satisfies the linker, but the
+  actual GLFW code lives in `glfw3.dll` at runtime. That DLL has to sit next
+  to the built `.exe` (it already does, in the repo root), or the program
+  won't start even though it compiled fine.
+# opengl-cpp-setup
